@@ -49,40 +49,42 @@ export const GetProvider = ({ children }) => {
         }
     };
 
-    const cancelRestaurantReservation = async (restaurantId, tableUid, reservationIndex) => {
+    const cancelRestaurantReservation = async (restaurantId, tableId, reservationIndex) => {
         try {
-          // Referência para a mesa específica no Firestore
-          const tableRef = doc(db, `restaurant/${restaurantId}/mesas`, tableUid);
-      
-          // Obtém o documento da mesa
-          const tableDoc = await getDoc(tableRef);
-      
-          if (tableDoc.exists()) {
-            const tableData = tableDoc.data();
-            const reservations = tableData.reservations || [];
-      
-            // Verifica se o índice da reserva é válido
-            if (reservationIndex >= 0 && reservationIndex < reservations.length) {
-              // Remove a reserva com base no índice
-              reservations.splice(reservationIndex, 1);
-      
-              // Atualiza o documento com a nova lista de reservas
-              await updateDoc(tableRef, {
-                reservations: reservations,
-              });
-      
-              console.log("Reserva cancelada com sucesso!");
+            // Referência para a mesa específica no Firestore
+            const tableRef = doc(db, `restaurant/${restaurantId}/mesas`, tableId);
+
+            // Obtém o documento da mesa
+            const tableDoc = await getDoc(tableRef);
+
+            if (tableDoc.exists()) {
+                const tableData = tableDoc.data();
+                const reservations = tableData.reservations || [];
+
+                console.log("Reservas atuais:", reservations); // Log para verificação
+
+                if (reservationIndex >= 0 && reservationIndex < reservations.length) {
+                    // Remove a reserva com base no índice
+                    reservations.splice(reservationIndex, 1);
+
+                    // Atualiza o documento com a nova lista de reservas
+                    await updateDoc(tableRef, {
+                        reservations: reservations,
+                    });
+
+                    console.log("Reserva cancelada com sucesso!");
+                } else {
+                    console.warn("Índice de reserva inválido."); // Mantém o aviso em caso de erro
+                }
             } else {
-              console.warn("Índice de reserva inválido.");
+                console.warn("Mesa não encontrada no restaurante.");
             }
-          } else {
-            console.warn("Mesa não encontrada no restaurante.");
-          }
         } catch (error) {
-          console.error("Erro ao cancelar a reserva no restaurante:", error);
-          throw error;
+            console.error("Erro ao cancelar a reserva no restaurante:", error);
+            throw error;
         }
-      };
+    };
+
 
 
     const logoutUser = async () => {
